@@ -1,0 +1,242 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-cell;
+    font-family: Poppins, sans-serif;
+}
+
+:root{
+    --shadow: 5px 5px 12px rgba(0, 0, 0, 0.08), -5px -5px 10px rgba(255, 255, 255, 0.895);
+    --text-shadow: 1px 1px 1px rgb(0 0 0 / 8%), -1px -1px 2px rgb(0 0 0 / 90%);
+    --inset-shadow: inset 5px 5px 12px rgba(0,0,0,0.08), inset -5px -5px 10px rgba(255,255,255,0.895);
+}
+
+body{
+    height: 100vh;
+    background-color: #ecf8f8;
+    overflow: hidden;
+}
+
+.container{
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+}
+
+.cell_container{
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    box-shadow: var(--shadow);
+    padding: 10px;
+}
+
+.cell{
+    width: 70px;
+    height: 70px;
+    border: 2px solid black;
+    cursor: pointer;
+    font-size: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.row{
+    display: flex;
+}
+
+.row1 .cell {
+    border-top: none;
+}
+
+.row1 .cell:nth-child(1){
+    border-left: none;
+}
+
+.row1 .cell:nth-child(3){
+    border-right: none;
+}
+
+.row2 .cell:first-child{
+    border-left: none;
+}
+
+.row2 .cell:last-child{
+    border-right: none;
+}
+
+.row3 .cell {
+    border-bottom: none;
+}
+
+.row3 .cell:first-child{
+    border-left: none;
+}
+
+.row3 .cell:last-child{
+    border-right: none;
+}
+
+/* Strike-through Animation */
+
+.cell_container .line{
+    position: relative;
+    transition: width 0.3s ease;
+    width: 90%;
+    height: 2px;
+    top: 45px;
+    left: 10px;
+    transition: width 1.3s ease;
+}
+
+.cell_container .hor{
+    opacity: 0;
+    pointer-events: none;
+}
+.cell_container .vert{
+    opacity: 0;
+    left: -63px;
+    top: 115px;
+    transform: rotate(90deg);
+    pointer-events: none;
+}
+.cell_container .left-dia{
+    opacity: 0;
+    width: 115%;
+    left: -16px;
+    top: 112px;
+    rotate: 45deg;
+    pointer-events: none;
+}
+.cell_container .right-dia{
+    opacity: 0;
+    width: 115%;
+    left: -16px;
+    top: 112px;
+    rotate: -45deg;
+    pointer-events: none;
+}
+
+.horizontal .cell_container .hor, .vertical .cell_container .vert, .left-diagonal .cell_container .left-dia, .right-diagonal .cell_container .right-dia{
+    opacity: 1;
+    border: none;
+    background-color: #bd89ed;
+    transition: width 1.3s ease;
+}
+
+.cell_container .hor::before, .cell_container .vert::before, .cell_container .left-dia::before, .cell_container .right-dia::before{
+    content: "";
+    position: absolute;
+    width: 0%;
+    height: 100%;
+    opacity: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: white;
+    transition: width 1.3s ease;
+    border: 0.2px solid white;
+}
+.active .cell_container .hor::before, .active .cell_container .vert::before, .active .cell_container .left-dia::before, .active .cell_container .right-dia::before{
+    width: 100%;
+}
+
+.horizontal .cell_container .hor::before, .vertical .cell_container .vert::before, .left-diagonal .cell_container .left-dia::before, .right-diagonal .cell_container .right-dia::before{
+    opacity: 1;
+    width: 0%;
+} 
+
+
+/* ------------ POPUP ------------ */
+
+
+.howToPlay-modal{
+    position: relative;
+    width: 30vw;
+    padding: 35px;
+    background-color: #f9f9f9;
+    box-shadow: var(--modal-shadow);
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 30px;
+    transition: transform 0.3s ease;
+    transform: scale(1);
+}
+.popUp{
+    position: absolute;
+    height: 100vh;
+    width: 100vw;
+    background-color: #ecececde;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+.howToPlay{
+    justify-content: center;
+    z-index: 4;
+
+}
+.close{
+    opacity: 0;
+    pointer-events: none;
+}
+.close-btn{
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: fit-content;
+    padding: 4px 12px;
+    border: none;
+    border-radius: 3px;
+    font-size: 19px;
+    color: white;
+    background-color: #f25959;
+    cursor: pointer;
+}
+.close-btn:hover{background-color: #ed4141;border: none;}
+.close .howToPlay-modal{
+    transform: scale(0.3);
+}
+
+/* ---------- BUTTON ----------- */
+.btn-wrapper{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 50px;
+}
+.btn-wrapper .btn{
+    cursor: pointer;
+    padding: 12px 15px;
+    box-shadow: var(--shadow);
+    background-color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #4a95ff;
+    width: fit-content;
+    user-select: none;
+}
+
+.btn-wrapper .btn:active{
+    box-shadow: var(--inset-shadow);
+}
+
+#whoWon{
+    font-size: 25px;
+    font-weight: 600;
+    text-shadow: var(--text-shadow);
+    color: black;
+}
+/* .won{
+    color: cornflowerblue;
+} */

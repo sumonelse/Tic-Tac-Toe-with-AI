@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <link rel="stylesheet" href="tic_tac_toe.css">
+    <script defer src="tic_tac_toe.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div id="howToPlay" class="howToPlay popUp close">
+            <div class="howToPlay-modal flex-col">
+                <button id="closeBtn" class="close-btn btn">&#215</button>
+                <div id="whoWon"></div>
+                <div class="btn-wrapper">
+                    <button id="homeBtn" class="btn" value="home">Home</button>
+                    <button id="playAgainBtn" class="btn" value="playAgain">Play Again</button>
+                </div>
+            </div>
+        </div>
+        <div id="gameArea">
+            <div class="cell_container">
+                <div class="row row1">
+                    <div class="cell"></div>
+                    <div class="cell"></div>
+                    <div class="cell"></div>
+                </div>
+                <div class="row row2">
+                    <div class="cell"></div>
+                    <div class="cell"></div>
+                    <div class="cell"></div>
+                </div>
+                <div class="row row3">
+                    <div class="cell"></div>
+                    <div class="cell"></div>
+                    <div class="cell"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
