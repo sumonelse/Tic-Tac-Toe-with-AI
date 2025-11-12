@@ -1,47 +1,20 @@
-let gameArea = document.getElementById("gameArea")
-let cellContainer = document.querySelector(".cell_container")
-let cells = document.querySelectorAll(".cell")
-let row_1_cells = document.querySelectorAll(".row1 .cell")
-let row_2_cells = document.querySelectorAll(".row2 .cell")
-let row_3_cells = document.querySelectorAll(".row3 .cell")
-let homeBtn = document.getElementById("homeBtn")
-let playAgainBtn = document.getElementById("playAgainBtn")
-let playerTurn = "X"
-let compMove = "0"
-let wonOrTie = false
+document.addEventListener("DOMContentLoaded", () => {
+    // Cached DOM references
+    const gameArea = document.getElementById("gameArea")
+    const cellContainer = document.querySelector(".cell_container")
+    const cells = Array.from(document.querySelectorAll(".cell"))
+    const homeBtn = document.getElementById("homeBtn")
+    const playAgainBtn = document.getElementById("playAgainBtn")
+    const closeBtn = document.getElementById("closeBtn")
+    const whoWonEl = document.getElementById("whoWon")
 
-cells.forEach((e) => {
-    e.addEventListener("click", () => {
-        if(e.innerHTML == "" && wonOrTie == false){
-            e.innerHTML = playerTurn
-            e.style.color = "#f19877"
-            setTimeout(() => {
-                checkWin();
-                compTurn(compMove, wonOrTie)
-            }, 700)
-            
-        }
-    })
-})
+    // Game state
+    let playerSymbol = "X"
+    let compSymbol = "O" // fix: capital O not zero
+    let finished = false
 
-let compTurn = (compMove, wonOrTie) => {
-    if(wonOrTie == true){ return }
-    let emptCellArr = []
-    cells.forEach((ele) => {
-        if(ele.innerHTML == ""){
-            emptCellArr.push(ele)
-        }
-    })
-    if(emptCellArr.length != 0){
-        let rand = Math.floor(Math.random() * emptCellArr.length)
-        emptCellArr[rand].innerHTML = compMove
-        emptCellArr[rand].style.color = "cornflowerblue"
-        checkWin();
-    }
-}
-
-let checkWin = () => {
-    const win = [
+    // Winning combinations - reused
+    const WIN_COMBINATIONS = [
         [0, 1, 2],
         [3, 4, 5],
         [6, 7, 8],
@@ -49,60 +22,128 @@ let checkWin = () => {
         [1, 4, 7],
         [2, 5, 8],
         [0, 4, 8],
-        [2, 4, 6]
+        [2, 4, 6],
     ]
 
-    win.forEach((e, ind) => {
-        if(((cells[e[0]].innerHTML == cells[e[1]].innerHTML) && (cells[e[1]].innerHTML == cells[e[2]].innerHTML) && (cells[e[0]].innerHTML == cells[e[2]].innerHTML)) && (cells[e[0]].innerHTML != "" && cells[e[1]].innerHTML != "" && cells[e[2]].innerHTML != "" )){
-            wonOrTie = true
-            showAnim("Win", cells[e[0]].innerHTML);
-            win.splice(ind)
-            console.log(win)
-        }else if((cells[0].innerHTML != "" && cells[1].innerHTML != "" && cells[2].innerHTML != "" && cells[3].innerHTML != "" && cells[4].innerHTML != "" && cells[5].innerHTML != "" && cells[6].innerHTML != "" && cells[7].innerHTML != "" && cells[8].innerHTML != ""  )){
-            wonOrTie = true
-            showAnim("Tie")
-        }
-    })
-}
+    // Public API: init / reset
+    function init() {
+        resetBoard()
+        // use event delegation on the container for fewer listeners
+        cellContainer.addEventListener("click", onCellClick)
+        closeBtn.addEventListener("click", onClose)
+        homeBtn.addEventListener("click", onHome)
+        playAgainBtn.addEventListener("click", onPlayAgain)
+    }
 
-let showAnim = (what, currTurn="") => {
-    let whoWon = document.getElementById("whoWon")
-    cellContainer.style.pointerEvents = "none"
-    setTimeout(() => {
-        whoWon.parentElement.parentElement.classList.remove("close")
-        if(what == "Win"){
-            whoWon.innerHTML = `<span class="wonOrTie">Player(${currTurn})</span> won`
-        }else if(what == "Tie"){
-            whoWon.innerHTML = `<span class="wonOrTie">It's a Tie</span> `
-        }
-    }, 100)
-}
+    function onCellClick(e) {
+        const cell = e.target.closest(".cell")
+        if (!cell || finished) return
+        const idx = cells.indexOf(cell)
+        if (idx === -1) return
+        if (cell.textContent !== "") return // already filled
 
-let closeBtn = document.getElementById("closeBtn")
-closeBtn.addEventListener("click", () => {
-    close();
+        makeMove(cell, playerSymbol)
+
+        // check player win
+        const result = evaluateBoard()
+        if (result) {
+            endGame(result)
+            return
+        }
+
+        // computer move after slight delay for UX
+        setTimeout(() => {
+            computerMove()
+            const res2 = evaluateBoard()
+            if (res2) endGame(res2)
+        }, 250)
+    }
+
+    function makeMove(cell, symbol) {
+        cell.textContent = symbol
+        cell.style.color =
+            symbol === playerSymbol ? "#f19877" : "cornflowerblue"
+    }
+
+    function computerMove() {
+        if (finished) return
+        const emptyIndexes = cells.flatMap((c, i) =>
+            c.textContent === "" ? [i] : []
+        )
+        if (emptyIndexes.length === 0) return
+
+        // Small heuristic: take center if available, else random
+        let choice
+        if (emptyIndexes.includes(4)) choice = 4
+        else
+            choice =
+                emptyIndexes[Math.floor(Math.random() * emptyIndexes.length)]
+
+        makeMove(cells[choice], compSymbol)
+    }
+
+    // returns { winner: 'X'|'O'|'Tie' } or null
+    function evaluateBoard() {
+        // Check win combos
+        for (let i = 0; i < WIN_COMBINATIONS.length; i++) {
+            const [a, b, c] = WIN_COMBINATIONS[i]
+            const va = cells[a].textContent
+            if (va === "") continue
+            if (va === cells[b].textContent && va === cells[c].textContent) {
+                return { winner: va }
+            }
+        }
+
+        // Check tie
+        const isFull = cells.every((c) => c.textContent !== "")
+        if (isFull) return { winner: "Tie" }
+        return null
+    }
+
+    function endGame(result) {
+        finished = true
+        cellContainer.style.pointerEvents = "none"
+        showPopup(result)
+    }
+
+    function showPopup(result) {
+        whoWonEl.parentElement.parentElement.classList.remove("close")
+        if (result.winner === "Tie") {
+            whoWonEl.innerHTML = `<span class="wonOrTie">It's a Tie</span>`
+        } else {
+            whoWonEl.innerHTML = `<span class="wonOrTie">Player(${result.winner})</span> won`
+        }
+    }
+
+    function onClose() {
+        closePopup()
+    }
+
+    function closePopup() {
+        document.getElementById("howToPlay").classList.add("close")
+        resetBoard()
+    }
+
+    function resetBoard() {
+        cells.forEach((c) => (c.textContent = ""))
+        finished = false
+        cellContainer.style.pointerEvents = "auto"
+        // ensure popup closed
+        const popup = document.getElementById("howToPlay")
+        if (popup && !popup.classList.contains("close"))
+            popup.classList.add("close")
+    }
+
+    function onHome() {
+        resetBoard()
+        closePopup()
+    }
+
+    function onPlayAgain() {
+        resetBoard()
+        closePopup()
+    }
+
+    // Initialize game
+    init()
 })
-let close = () => {
-    document.getElementById("howToPlay").classList.add("close")
-    clearCellValue();
-}
-
-let clearCellValue = () => {
-    cells.forEach((e) => {
-        e.innerHTML = ""
-    })
-    wonOrTie = false
-    cellContainer.style.pointerEvents = "auto"
-}
-homeBtn.onclick = () => {
-    clearCellValue();
-    close();
-}
-
-playAgainBtn.onclick = () => {
-    clearCellValue();
-    close();
-}
-
-// let before = window.getComputedStyle(cellContainer, "::before")
-// let befTop = before.getPropertyValue("top")
